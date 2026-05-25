@@ -234,9 +234,11 @@ static avifResult avifImageCopyProperties(avifImage * dstImage, const avifImage 
     dstImage->numProperties = 0;
 
     if (srcImage->numProperties != 0) {
-        dstImage->properties = (avifImageItemProperty *)avifAlloc(srcImage->numProperties * sizeof(srcImage->properties[0]));
+        AVIF_CHECKERR(srcImage->numProperties <= SIZE_MAX / sizeof(srcImage->properties[0]), AVIF_RESULT_INVALID_ARGUMENT);
+        const size_t propertiesSize = srcImage->numProperties * sizeof(srcImage->properties[0]);
+        dstImage->properties = (avifImageItemProperty *)avifAlloc(propertiesSize);
         AVIF_CHECKERR(dstImage->properties != NULL, AVIF_RESULT_OUT_OF_MEMORY);
-        memset(dstImage->properties, 0, srcImage->numProperties * sizeof(srcImage->properties[0]));
+        memset(dstImage->properties, 0, propertiesSize);
         dstImage->numProperties = srcImage->numProperties;
         for (size_t i = 0; i < srcImage->numProperties; ++i) {
             memcpy(dstImage->properties[i].boxtype, srcImage->properties[i].boxtype, sizeof(srcImage->properties[i].boxtype));
